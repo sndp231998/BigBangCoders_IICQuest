@@ -1,4 +1,11 @@
+import 'dart:convert';
+import 'package:hackathon/core/constants.dart';
+import 'package:hackathon/features/home/pages/home.dart';
+import 'package:hackathon/providers/auth_provider.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:hackathon/features/auth/pages/register_page.dart';
+import 'package:provider/provider.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -19,12 +26,49 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  void _login(BuildContext context) {
+  void _login(BuildContext context) async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
     if (_formKey.currentState!.validate()) {
-      // Perform login action
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Logging in...')),
+      // Get the username and password
+      final username = _usernameController.text;
+      final password = _passwordController.text;
+
+      final url = Uri.parse('${Constants.API_BASE}api/v1/users/login');
+      final response = await http.post(
+        url,
+        body: jsonEncode({'email': username, 'password': password}),
+        headers: {'Content-Type': 'application/json'},
       );
+
+      // Perform the login API call
+
+      // Check if the response is successful
+      if (response.statusCode == 200) {
+        var result = jsonDecode(response.body);
+        authProvider.setId = result['id'];
+        // Login successful, do something (e.g., navigate to home page)
+        // if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Login successful')),
+        );
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (context) => const Home()));
+        // Navigate to the home page or any other destination
+        // Navigator.pushReplacementNamed(context, '/home');
+      } else {
+        setState(() {
+          _passwordController.text = "";
+        });
+        // Login failed, show error message
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Login failed: ${response.body}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
     }
   }
 
@@ -39,10 +83,21 @@ class _LoginPageState extends State<LoginPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
+                // Logo or Header
+                Image.asset(
+                  'assets/images/logo.png', // Your logo image path
+                  width: 250,
+                  height: 150,
+                  fit: BoxFit.cover,
+                  // You can adjust width and height as needed
+                ),
+                const SizedBox(height: 30),
+                // Username Field
                 TextFormField(
                   controller: _usernameController,
                   decoration: const InputDecoration(
                     labelText: 'Username',
+                    prefixIcon: Icon(Icons.person),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -51,10 +106,13 @@ class _LoginPageState extends State<LoginPage> {
                     return null;
                   },
                 ),
+                const SizedBox(height: 20),
+                // Password Field
                 TextFormField(
                   controller: _passwordController,
                   decoration: const InputDecoration(
                     labelText: 'Password',
+                    prefixIcon: Icon(Icons.lock),
                   ),
                   obscureText: true,
                   validator: (value) {
@@ -65,9 +123,20 @@ class _LoginPageState extends State<LoginPage> {
                   },
                 ),
                 const SizedBox(height: 20),
-                ElevatedButton(
+                // Login Button
+                ElevatedButton.icon(
                   onPressed: () => _login(context),
-                  child: const Text('Login'),
+                  icon: const Icon(Icons.login),
+                  label: const Text('Login'),
+                ),
+                const SizedBox(height: 10), // Add some spacing
+                TextButton(
+                  onPressed: () {
+                    // Navigate to the register page
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => const RegisterPage()));
+                  },
+                  child: const Text('Register'),
                 ),
               ],
             ),

@@ -38,6 +38,10 @@ flutter_lints
 3.1
 file:///home/empash/.pub-cache/hosted/pub.dev/flutter_lints-3.0.2/
 file:///home/empash/.pub-cache/hosted/pub.dev/flutter_lints-3.0.2/lib/
+groq_sdk
+3.0
+file:///home/empash/.pub-cache/hosted/pub.dev/groq_sdk-0.0.6/
+file:///home/empash/.pub-cache/hosted/pub.dev/groq_sdk-0.0.6/lib/
 http
 3.3
 file:///home/empash/.pub-cache/hosted/pub.dev/http-1.2.1/

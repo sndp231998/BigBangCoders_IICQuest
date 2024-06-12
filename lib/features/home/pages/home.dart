@@ -1,4 +1,9 @@
+import 'dart:convert';
+import 'dart:math';
+
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:hackathon/core/constants.dart';
 import 'package:hackathon/features/collaboration/pages/collaboration.dart';
 import 'package:hackathon/features/consult/pages/consult.dart';
 import 'package:hackathon/features/profile/pages/profile.dart';
@@ -30,29 +35,7 @@ class _HomeState extends State<Home> {
     }
   }
 
-  final List<Map<String, String>> _posts = [
-    {
-      'userImage': 'https://via.placeholder.com/150',
-      'userName': 'John Doe',
-      'title': 'Sample Post Title',
-      'postContent': 'This is a sample post content.',
-      'postImage': 'https://via.placeholder.com/300'
-    },
-    {
-      'userImage': 'https://via.placeholder.com/150',
-      'userName': 'John Doe',
-      'title': 'Sample Post Title',
-      'postContent': 'This is a sample post content.',
-      'postImage': 'https://via.placeholder.com/300'
-    },
-    {
-      'userImage': 'https://via.placeholder.com/150',
-      'userName': 'John Doe',
-      'title': 'Sample Post Title',
-      'postContent': 'This is a sample post content.',
-      'postImage': 'https://via.placeholder.com/300'
-    },
-  ];
+  List<Map<String, dynamic>> _posts = [];
 
   final List _homeWidgets = [
     {
@@ -60,14 +43,57 @@ class _HomeState extends State<Home> {
       'title': 'Health services',
     },
     {
-      'icon': Icons.group,
-      'title': 'Peer support groups',
+      'icon': Icons.notes,
+      'title': 'Our Blogs',
     },
     {
       'icon': Icons.library_books,
       'title': 'Online resources and articles',
     },
   ];
+
+  void fetchPosts() async {
+    final url = Uri.parse('${Constants.API_BASE}api/v1/posts');
+    final response = await http.get(
+      url,
+    );
+
+    // Perform the login API call
+
+    // Check if the response is successful
+    if (response.statusCode == 200) {
+      var result = jsonDecode(response.body);
+      setState(() {
+        _posts = [...result['content']];
+      });
+      // Login successful, do something (e.g., navigate to home page)
+      // if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Posts fetched successful')),
+      );
+      // Navigate to the home page or any other destination
+      // Navigator.pushReplacementNamed(context, '/home');
+    } else {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Fetching failed: ${response.body}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  String randomNumber() {
+    return Random().nextInt(100).toString();
+  }
+
+  @override
+  void initState() {
+    fetchPosts();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -146,11 +172,21 @@ class _HomeState extends State<Home> {
                 itemCount: _posts.length,
                 itemBuilder: (context, index) {
                   final post = _posts[index];
+                  print(post);
                   return Container(
                     margin: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(4),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.5),
+                            spreadRadius: 1,
+                            blurRadius: 4,
+                            offset: const Offset(
+                                0, 3), // changes position of shadow
+                          ),
+                        ],
+                        borderRadius: BorderRadius.circular(8),
                         border: Border.all(
                           color: Colors.black12,
                           width: 1.0,
@@ -171,20 +207,8 @@ class _HomeState extends State<Home> {
                                   borderRadius: BorderRadius.circular(12),
                                   color: Colors.grey[300],
                                 ),
-                                child: const Text('health',
-                                    style: TextStyle(fontSize: 12)),
-                              ),
-                              Container(
-                                margin:
-                                    const EdgeInsets.symmetric(horizontal: 4),
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 4),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(12),
-                                  color: Colors.grey[300],
-                                ),
-                                child: const Text('fitness',
-                                    style: TextStyle(fontSize: 12)),
+                                child: Text(post['category']['categoryTitle'],
+                                    style: const TextStyle(fontSize: 12)),
                               ),
                             ],
                           ),
@@ -193,13 +217,14 @@ class _HomeState extends State<Home> {
                           ),
                           Row(
                             children: [
-                              CircleAvatar(
-                                backgroundImage:
-                                    NetworkImage(post['userImage']!),
+                              const CircleAvatar(
+                                backgroundImage: NetworkImage(
+                                    // 'https://randomuser.me/api/portraits/men/${randomNumber()}.jpg'),
+                                    'https://randomuser.me/api/portraits/men/21.jpg'),
                               ),
                               const SizedBox(width: 10),
                               Text(
-                                post['userName']!,
+                                post['user']['name'],
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,
@@ -260,6 +285,12 @@ class _HomeState extends State<Home> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // Add onPressed action
+          showModalBottomSheet(
+              context: context,
+              // isScrollControlled: true,
+              builder: (context) {
+                return const ChatWithAISheet();
+              });
         },
         child: const Icon(Icons.chat),
       ),
@@ -304,3 +335,106 @@ class _HomeState extends State<Home> {
     );
   }
 }
+
+class ChatWithAISheet extends StatefulWidget {
+  const ChatWithAISheet({super.key});
+
+  @override
+  _ChatWithAISheetState createState() => _ChatWithAISheetState();
+}
+
+class _ChatWithAISheetState extends State<ChatWithAISheet> {
+  final List<Map<String, String>> _messages = [];
+  final TextEditingController _controller = TextEditingController();
+
+  void _sendMessage() {
+    if (_controller.text.isNotEmpty) {
+      setState(() {
+        _messages.add({'text': _controller.text, 'sender': 'user'});
+        _messages.add(
+            {'text': _generateAIResponse(_controller.text), 'sender': 'ai'});
+      });
+      _controller.clear();
+    }
+  }
+
+  String _generateAIResponse(String userMessage) {
+    // In a real application, you would make a request to an AI service
+    return 'AI response to "$userMessage"';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: Column(
+        children: [
+          const SizedBox(
+            height: 10,
+          ),
+          const Text('Talk with AI',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700)),
+          Expanded(
+            child: ListView.builder(
+              itemCount: _messages.length,
+              itemBuilder: (context, index) {
+                final message = _messages[index];
+                return ListTile(
+                  title: Align(
+                    alignment: message['sender'] == 'user'
+                        ? Alignment.centerRight
+                        : Alignment.centerLeft,
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: message['sender'] == 'user'
+                            ? Colors.blueAccent
+                            : Colors.grey[300],
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        message['text']!,
+                        style: TextStyle(
+                          color: message['sender'] == 'user'
+                              ? Colors.white
+                              : Colors.black,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _controller,
+                      decoration: const InputDecoration(
+                        hintText: 'Type your message...',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.send),
+                    onPressed: _sendMessage,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// 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

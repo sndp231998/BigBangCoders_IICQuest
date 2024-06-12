@@ -101,6 +101,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  groq_sdk:
+    dependency: "direct main"
+    description:
+      name: groq_sdk
+      sha256: c29b6ac4db2bcd15f6aae9bf3e93d7f749e9dc68a4916e0fb04f7c1e2bfc9b1a
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.6"
   http:
     dependency: "direct main"
     description:
