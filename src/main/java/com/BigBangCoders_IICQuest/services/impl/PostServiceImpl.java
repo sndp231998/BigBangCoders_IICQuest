@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
 
 import com.BigBangCoders_IICQuest.Payloads.PostDto;
 import com.BigBangCoders_IICQuest.Payloads.PostResponse;
@@ -24,7 +25,7 @@ import com.BigBangCoders_IICQuest.services.PostService;
 
 
 
-
+@Service
 public class PostServiceImpl implements PostService{
 	 @Autowired
 	    private PostRepo postRepo;

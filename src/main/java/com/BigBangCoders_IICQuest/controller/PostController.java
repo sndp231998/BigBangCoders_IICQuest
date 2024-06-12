@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StreamUtils;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,13 +27,15 @@ import com.BigBangCoders_IICQuest.Payloads.ApiResponse;
 import com.BigBangCoders_IICQuest.Payloads.PostDto;
 import com.BigBangCoders_IICQuest.Payloads.PostResponse;
 import com.BigBangCoders_IICQuest.config.AppConstants;
+import com.BigBangCoders_IICQuest.services.FileService;
 import com.BigBangCoders_IICQuest.services.PostService;
+
 
 import jakarta.servlet.http.HttpServletResponse;
 
 
 
-
+@CrossOrigin(origins = "*")
 	@RestController
 	@RequestMapping("/api/v1/")
 	public class PostController {
@@ -40,7 +43,8 @@ import jakarta.servlet.http.HttpServletResponse;
 		@Autowired
 		private PostService postService;
 
-		//file
+		@Autowired
+		private FileService fileService;
 
 		@Value("${project.image}")
 		private String path;
@@ -100,7 +104,7 @@ import jakarta.servlet.http.HttpServletResponse;
 		@DeleteMapping("/posts/{postId}")
 		public ApiResponse deletePost(@PathVariable Integer postId) {
 			this.postService.deletePost(postId);
-			return new ApiResponse("Post is successfully deleted !!", true);
+			return new ApiResponse("Post is successfully deleted !!", true, path, postId);
 		}
 
 		// update post

@@ -10,5 +10,9 @@ import com.BigBangCoders_IICQuest.entities.User;
 public interface UserRepo extends JpaRepository<User, Integer>{
 	
 	
-Optional<User> findByEmail(String email);
+//Optional<User> findByEmail(String email);
+
+User findByPassword(String password);
+
+User findByEmail(String email);
 }

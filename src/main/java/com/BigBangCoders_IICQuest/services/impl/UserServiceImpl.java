@@ -7,11 +7,14 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.BigBangCoders_IICQuest.Payloads.ApiResponse;
+import com.BigBangCoders_IICQuest.Payloads.LoginDto;
 import com.BigBangCoders_IICQuest.Payloads.UserDto;
 import com.BigBangCoders_IICQuest.entities.User;
 import com.BigBangCoders_IICQuest.exception.ResourceNotFoundException;
 import com.BigBangCoders_IICQuest.repositories.UserRepo;
 import com.BigBangCoders_IICQuest.services.UserService;
+
 
 
 
@@ -105,5 +108,25 @@ public class UserServiceImpl implements UserService {
 	        return this.userToDto(savedUser);
 
 	}
+	
+	@Override
+	public ApiResponse login(LoginDto loginDto) {
+		 User user = userRepo.findByEmail(loginDto.getEmail());
+		 System.out.print(user+"12");
+	        if (user == null) {
+	        	//System.out.print(user);
+	            throw new RuntimeException((loginDto.getPassword()));
+	            }else
+	                if (user.getPassword().equals(loginDto.getPassword())) {
+	                	  int userId = user.getUserId();
+	                	  String name=user.getName();
+	                	  
+	                	  System.out.print(name+"jss");
+	                	return new ApiResponse("Login Success ",true, name, userId);
+	        }else
+	        throw new RuntimeException("Password mismatch.");
+
+	        }
+
 
 }

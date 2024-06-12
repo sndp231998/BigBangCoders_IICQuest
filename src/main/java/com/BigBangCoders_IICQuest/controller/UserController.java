@@ -6,7 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,12 +17,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.BigBangCoders_IICQuest.Payloads.ApiResponse;
+import com.BigBangCoders_IICQuest.Payloads.LoginDto;
 import com.BigBangCoders_IICQuest.Payloads.UserDto;
 import com.BigBangCoders_IICQuest.services.UserService;
 
+
 import jakarta.validation.Valid;
 
-
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/v1/users")
 public class UserController {
@@ -52,7 +54,7 @@ public class UserController {
 	@DeleteMapping("/{userId}")
 	public ResponseEntity<ApiResponse> deleteUser(@PathVariable("userId") Integer uid) {
 		this.userService.deleteUser(uid);
-		return new ResponseEntity<ApiResponse>(new ApiResponse("User deleted Successfully", true), HttpStatus.OK);
+		return new ResponseEntity<ApiResponse>(new ApiResponse("User deleted Successfully", true, null, uid), HttpStatus.OK);
 	}
 
 	// GET - user get
@@ -67,4 +69,11 @@ public class UserController {
 		return ResponseEntity.ok(this.userService.getUserById(userId));
 	}
 
+	
+	
+
+    @PostMapping("/login")
+    public ApiResponse login(@RequestBody LoginDto loginDto){
+        return userService.login(loginDto);
+    }
 }

@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.BigBangCoders_IICQuest.Payloads.CategoryDto;
 import com.BigBangCoders_IICQuest.entities.Category;
@@ -14,7 +15,7 @@ import com.BigBangCoders_IICQuest.services.CategoryService;
 
 
 
-
+@Service
 public class CategoryServiceImpl implements CategoryService {
 
 	@Autowired
