@@ -202,6 +202,12 @@ void _showOptionsDialog(BuildContext context, Professional professional) {
                 title: const Text('Chat'),
                 onTap: () {
                   // Implement logic to navigate to chat interface
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (context) {
+                      return ChatModal(professional: professional);
+                    },
+                  );
                 },
               ),
               ListTile(
@@ -267,4 +273,110 @@ void _scheduleAppointment(BuildContext context, Professional professional) {
       );
     },
   );
+}
+
+class ChatModal extends StatefulWidget {
+  final Professional professional;
+
+  const ChatModal({super.key, required this.professional});
+
+  @override
+  _ChatModalState createState() => _ChatModalState();
+}
+
+class _ChatModalState extends State<ChatModal> {
+  final List<Map<String, String>> _messages = [];
+  final TextEditingController _controller = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _messages.addAll([
+      {'text': 'Hi there!', 'sender': 'John Doe'},
+      {'text': 'Hello! How can I help you?', 'sender': 'You'},
+    ]);
+  }
+
+  void _sendMessage() {
+    if (_controller.text.isNotEmpty) {
+      setState(() {
+        _messages.add({'text': _controller.text, 'sender': 'You'});
+        // Dummy AI response for now
+        _messages.add({'text': 'Got it!', 'sender': widget.professional.name});
+      });
+      _controller.clear();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      resizeToAvoidBottomInset: true,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              Text(
+                'Chat with ${widget.professional.name}',
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: _messages.length,
+                  itemBuilder: (context, index) {
+                    final message = _messages[index];
+                    return Align(
+                      alignment: message['sender'] == 'You'
+                          ? Alignment.centerRight
+                          : Alignment.centerLeft,
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(vertical: 5),
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: message['sender'] == 'You'
+                              ? Colors.blueAccent
+                              : Colors.grey[300],
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          message['text']!,
+                          style: TextStyle(
+                            color: message['sender'] == 'You'
+                                ? Colors.white
+                                : Colors.black,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _controller,
+                        decoration: const InputDecoration(
+                          hintText: 'Type your message...',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.send),
+                      onPressed: _sendMessage,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }

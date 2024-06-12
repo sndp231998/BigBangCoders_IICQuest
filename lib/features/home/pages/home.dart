@@ -1,12 +1,19 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:groq_sdk/models/chat_event.dart';
+import 'package:groq_sdk/models/groq.dart';
+import 'package:groq_sdk/models/groq_chat.dart';
+import 'package:groq_sdk/models/groq_llm_model.dart';
+import 'package:hackathon/features/auth/pages/login_page.dart';
+import 'package:hackathon/providers/auth_provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:hackathon/core/constants.dart';
 import 'package:hackathon/features/collaboration/pages/collaboration.dart';
 import 'package:hackathon/features/consult/pages/consult.dart';
 import 'package:hackathon/features/profile/pages/profile.dart';
+import 'package:provider/provider.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -97,28 +104,6 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    String getGreeting() {
-      var hour = DateTime.now().hour;
-      if (hour < 12) {
-        return 'Good Morning!';
-      } else if (hour < 18) {
-        return 'Good Afternoon!';
-      } else {
-        return 'Good Evening!';
-      }
-    }
-
-    IconData getIcon() {
-      var hour = DateTime.now().hour;
-      if (hour < 12) {
-        return Icons.wb_sunny; // Morning icon
-      } else if (hour < 18) {
-        return Icons.brightness_5; // Afternoon icon
-      } else {
-        return Icons.nights_stay; // Evening icon
-      }
-    }
-
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -127,12 +112,101 @@ class _HomeState extends State<Home> {
               const SizedBox(
                 height: 20,
               ),
-              Center(
-                child: Image.asset(
-                  'assets/images/logo.png',
-                  width: 350,
-                  height: 100,
-                  fit: BoxFit.cover,
+              Stack(
+                alignment: Alignment.topRight,
+                children: [
+                  Center(
+                    child: Image.asset(
+                      'assets/images/logo.png', // Your logo image path
+                      width: 350,
+                      height: 100,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  // Positioned(
+                  //   top: 10,
+                  //   right: 10,
+                  //   child: GestureDetector(
+                  //     onTap: () => _showNotifications(context),
+                  //     child: Stack(
+                  //       alignment: Alignment.center,
+                  //       children: [
+                  //         Container(
+                  //           padding: const EdgeInsets.all(8),
+                  //           decoration: const BoxDecoration(
+                  //             color: Colors.red,
+                  //             shape: BoxShape.circle,
+                  //           ),
+                  //           child: const Icon(
+                  //             Icons.notifications,
+                  //             color: Colors.white,
+                  //             size: 20,
+                  //           ),
+                  //         ),
+                  //       ],
+                  //     ),
+                  //   ),
+                  // ),
+                ],
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              Card(
+                margin: const EdgeInsets.all(16.0),
+                color: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+                elevation: 4.0,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    children: [
+                      const CircleAvatar(
+                        radius: 30,
+                        backgroundImage: NetworkImage(
+                            'https://randomuser.me/api/portraits/men/86.jpg'),
+                      ),
+                      const SizedBox(width: 16.0),
+                      const Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Raul',
+                            style: TextStyle(
+                              fontSize: 18.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 4.0),
+                        ],
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        onPressed: () => _showNotifications(context),
+                        icon: const Icon(Icons.notifications),
+                        color: Colors.blueGrey,
+                      ),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          // logout
+                          final authProvider =
+                              Provider.of<AuthProvider>(context, listen: false);
+                          authProvider.setId = 0;
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => const LoginPage()));
+                        },
+                        icon: const Icon(
+                          Icons.logout,
+                          color: Colors.red,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
 
@@ -172,7 +246,6 @@ class _HomeState extends State<Home> {
                 itemCount: _posts.length,
                 itemBuilder: (context, index) {
                   final post = _posts[index];
-                  print(post);
                   return Container(
                     margin: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
@@ -298,6 +371,43 @@ class _HomeState extends State<Home> {
     );
   }
 
+  void _showNotifications(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return const Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Notifications',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 10),
+              ListTile(
+                leading: Icon(Icons.notification_important),
+                title: Text('Notification 1'),
+                subtitle: Text('Details about notification 1'),
+              ),
+              ListTile(
+                leading: Icon(Icons.notification_important),
+                title: Text('Notification 2'),
+                subtitle: Text('Details about notification 2'),
+              ),
+              ListTile(
+                leading: Icon(Icons.notification_important),
+                title: Text('Notification 3'),
+                subtitle: Text('Details about notification 3'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildScreenCard(BuildContext context, IconData? icon, String? text) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10, right: 10),
@@ -344,23 +454,44 @@ class ChatWithAISheet extends StatefulWidget {
 }
 
 class _ChatWithAISheetState extends State<ChatWithAISheet> {
-  final List<Map<String, String>> _messages = [];
+  final List<ChatEvent> _messages = [];
   final TextEditingController _controller = TextEditingController();
+  late final GroqChat chat;
 
-  void _sendMessage() {
+  void _sendMessage() async {
     if (_controller.text.isNotEmpty) {
-      setState(() {
-        _messages.add({'text': _controller.text, 'sender': 'user'});
-        _messages.add(
-            {'text': _generateAIResponse(_controller.text), 'sender': 'ai'});
-      });
+      final text = _controller.text;
       _controller.clear();
+      await chat.sendMessage(text);
     }
   }
 
   String _generateAIResponse(String userMessage) {
     // In a real application, you would make a request to an AI service
     return 'AI response to "$userMessage"';
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    final groq =
+        Groq("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");
+    chat = groq.startNewChat(llama3_8b);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      chat.stream.listen((event) {
+        debugPrint('Received event: $event');
+        setState(() {
+          _messages.add(event);
+        });
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    chat.dispose();
+    _controller.dispose();
   }
 
   @override
@@ -381,29 +512,19 @@ class _ChatWithAISheetState extends State<ChatWithAISheet> {
               itemCount: _messages.length,
               itemBuilder: (context, index) {
                 final message = _messages[index];
-                return ListTile(
-                  title: Align(
-                    alignment: message['sender'] == 'user'
-                        ? Alignment.centerRight
-                        : Alignment.centerLeft,
-                    child: Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: message['sender'] == 'user'
-                            ? Colors.blueAccent
-                            : Colors.grey[300],
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        message['text']!,
-                        style: TextStyle(
-                          color: message['sender'] == 'user'
-                              ? Colors.white
-                              : Colors.black,
-                        ),
-                      ),
-                    ),
-                  ),
+                return message.when(
+                  request: (requestEvent) {
+                    return MessageItem(
+                      isUserMessage: true,
+                      message: requestEvent.message.content,
+                    );
+                  },
+                  response: (responseEvent) {
+                    return MessageItem(
+                      isUserMessage: false,
+                      message: responseEvent.response.choices.first.message,
+                    );
+                  },
                 );
               },
             ),
@@ -437,4 +558,38 @@ class _ChatWithAISheetState extends State<ChatWithAISheet> {
   }
 }
 
-// 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
+class MessageItem extends StatelessWidget {
+  final bool isUserMessage;
+  final String message;
+  const MessageItem({
+    required this.isUserMessage,
+    required this.message,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20.0),
+      margin: const EdgeInsets.all(8.0),
+      decoration: BoxDecoration(
+        color: isUserMessage ? Colors.blueGrey[300] : Colors.grey[300],
+        borderRadius: isUserMessage
+            ? const BorderRadius.only(
+                topLeft: Radius.circular(20.0),
+                bottomLeft: Radius.circular(20.0),
+                bottomRight: Radius.circular(20.0),
+              )
+            : const BorderRadius.only(
+                topRight: Radius.circular(20.0),
+                bottomLeft: Radius.circular(20.0),
+                bottomRight: Radius.circular(20.0),
+              ),
+      ),
+      child: Text(
+        message,
+        textAlign: isUserMessage ? TextAlign.right : TextAlign.left,
+      ),
+    );
+  }
+}

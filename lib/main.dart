@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hackathon/features/auth/pages/login_page.dart';
+import 'package:hackathon/features/consult/pages/dashboard.dart';
 import 'package:hackathon/features/home/pages/home.dart';
 import 'package:hackathon/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
@@ -43,6 +44,8 @@ class MyHomePage extends StatelessWidget {
     // Handle null value from authProvider.getId
     final isAuthenticated = authProvider.getId != 0;
 
-    return isAuthenticated ? const Home() : const LoginPage();
+    // return isAuthenticated ? const Home() : const LoginPage();
+    // return const Dashboard();
+    return Home();
   }
 }

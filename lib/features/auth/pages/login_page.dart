@@ -45,7 +45,13 @@ class _LoginPageState extends State<LoginPage> {
       // Check if the response is successful
       if (response.statusCode == 200) {
         var result = jsonDecode(response.body);
+
+        print(result);
+
         authProvider.setId = result['id'];
+
+        // check for 501 (consultant)
+
         // Login successful, do something (e.g., navigate to home page)
         // if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
