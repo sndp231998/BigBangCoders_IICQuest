@@ -32,6 +32,8 @@ flutter:
 
   assets:
     - assets/images/logo.png
+    - assets/images/consult1.jpeg
+    - assets/images/consult2.jpeg
   #   - images/a_dot_ham.jpeg
 
   # fonts:
