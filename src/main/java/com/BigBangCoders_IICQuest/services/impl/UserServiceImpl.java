@@ -10,10 +10,14 @@ import org.springframework.stereotype.Service;
 import com.BigBangCoders_IICQuest.Payloads.ApiResponse;
 import com.BigBangCoders_IICQuest.Payloads.LoginDto;
 import com.BigBangCoders_IICQuest.Payloads.UserDto;
+import com.BigBangCoders_IICQuest.config.AppConstants;
+
 import com.BigBangCoders_IICQuest.entities.User;
 import com.BigBangCoders_IICQuest.exception.ResourceNotFoundException;
+
 import com.BigBangCoders_IICQuest.repositories.UserRepo;
 import com.BigBangCoders_IICQuest.services.UserService;
+
 
 
 
@@ -21,7 +25,9 @@ import com.BigBangCoders_IICQuest.services.UserService;
 @Service
 public class UserServiceImpl implements UserService {
 
-	
+//	
+//	@Autowired
+//	private RoleRepo roleRepo;
 	
 	@Autowired
 	private UserRepo userRepo;
@@ -108,6 +114,9 @@ public class UserServiceImpl implements UserService {
 	        return this.userToDto(savedUser);
 
 	}
+
+	
+
 	
 	@Override
 	public ApiResponse login(LoginDto loginDto) {

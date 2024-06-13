@@ -2,8 +2,7 @@ package com.BigBangCoders_IICQuest.Payloads;
 
 
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,12 +11,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CommentDto {
-	private Integer categoryId;
-	@NotBlank
-	@Size(min = 4,message = "Min size of category title is 4")
-	private String categoryTitle;
+	private int id;
 
-	@NotBlank
-	@Size(min = 10, message = "min size of cateogry desc is 10")
-	private String categoryDescription;
+	private String content;
+	
+	private Integer postId;
 }

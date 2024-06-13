@@ -21,10 +21,14 @@ public class BlogServiceImpl implements BlogService{
 
 	  @Autowired
 	    private BlogRepo blogRepo;
+	  
+
 	@Override
 	public List<Blog> getBlogs() {
 		 return blogRepo.findAll();
 	}
+	
+	
 	@Override
 	public BlogDto createBlog(BlogDto blogDto) {
 		  Blog blog = this.modelMapper.map(blogDto, Blog.class);

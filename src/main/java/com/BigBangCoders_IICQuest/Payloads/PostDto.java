@@ -26,5 +26,5 @@ private Integer postId;
 
 	private UserDto user;
 	
-	//private Set<CommentDto> comments=new HashSet<>();
+	private Set<CommentDto> comments=new HashSet<>();
 }
