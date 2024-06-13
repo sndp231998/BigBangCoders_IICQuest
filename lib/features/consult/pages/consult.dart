@@ -227,6 +227,10 @@ void _showOptionsDialog(BuildContext context, Professional professional) {
 }
 
 void _scheduleAppointment(BuildContext context, Professional professional) {
+  final TextEditingController _dateController = TextEditingController();
+  final TextEditingController _timeController = TextEditingController();
+  final TextEditingController _reasonController = TextEditingController();
+
   showDialog(
     context: context,
     builder: (BuildContext context) {
@@ -236,6 +240,7 @@ void _scheduleAppointment(BuildContext context, Professional professional) {
           mainAxisSize: MainAxisSize.min,
           children: [
             TextFormField(
+              controller: _dateController,
               decoration: const InputDecoration(labelText: 'Date'),
               keyboardType: TextInputType.datetime,
               onTap: () {
@@ -243,6 +248,7 @@ void _scheduleAppointment(BuildContext context, Professional professional) {
               },
             ),
             TextFormField(
+              controller: _timeController,
               decoration: const InputDecoration(labelText: 'Time'),
               keyboardType: TextInputType.datetime,
               onTap: () {
@@ -250,6 +256,7 @@ void _scheduleAppointment(BuildContext context, Professional professional) {
               },
             ),
             TextFormField(
+              controller: _reasonController,
               decoration: const InputDecoration(labelText: 'Reason'),
               maxLines: 3,
             ),
@@ -257,15 +264,48 @@ void _scheduleAppointment(BuildContext context, Professional professional) {
         ),
         actions: [
           TextButton(
-            onPressed: () {
-              // Implement logic to handle appointment scheduling
-              Navigator.pop(context);
+            onPressed: () async {
+              final date = _dateController.text;
+              final time = _timeController.text;
+              final reason = _reasonController.text;
+
+              if (date.isEmpty || time.isEmpty || reason.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Please fill in all fields')),
+                );
+                return;
+              }
+
+              // final url = Uri.parse('YOUR_API_ENDPOINT');
+              // final response = await http.post(
+              //   url,
+              //   headers: {'Content-Type': 'application/json'},
+              //   body: jsonEncode({
+              //     'professionalId': professional.id,
+              //     'date': date,
+              //     'time': time,
+              //     'reason': reason,
+              //   }),
+              // );
+
+              if (true) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                      content: Text('Appointment scheduled successfully!')),
+                );
+                Navigator.pop(context); // Close dialog
+              }
+              // else {
+              //   ScaffoldMessenger.of(context).showSnackBar(
+              //     const SnackBar(content: Text('Failed to schedule appointment')),
+              //   );
+              // }
             },
             child: const Text('Schedule'),
           ),
           TextButton(
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pop(context); // Close dialog
             },
             child: const Text('Cancel'),
           ),

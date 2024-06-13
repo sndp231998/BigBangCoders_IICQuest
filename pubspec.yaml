@@ -20,6 +20,8 @@ dependencies:
   shared_preferences: ^2.2.3
   provider: ^6.1.2
   groq_sdk: ^0.0.6
+  app_usage: ^3.0.1
+  flutter_webview_plugin: ^0.4.0
 
 dev_dependencies:
   flutter_test:
@@ -35,6 +37,11 @@ flutter:
     - assets/images/logo.png
     - assets/images/consult1.jpeg
     - assets/images/consult2.jpeg
+    - assets/images/blog1.avif
+    - assets/images/selfimage.jpg
+    - assets/images/antiloneliness.jpg
+    - assets/images/secondlife.jpeg
+    - assets/images/digital.jpg
   #   - images/a_dot_ham.jpeg
 
   # fonts:

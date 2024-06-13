@@ -1,12 +1,20 @@
 import 'dart:convert';
 import 'dart:math';
-
+import 'package:app_usage/app_usage.dart';
 import 'package:groq_sdk/models/chat_event.dart';
 import 'package:groq_sdk/models/groq.dart';
 import 'package:groq_sdk/models/groq_chat.dart';
 import 'package:groq_sdk/models/groq_llm_model.dart';
+import 'package:hackathon/core/utils.dart';
 import 'package:hackathon/features/auth/pages/login_page.dart';
+import 'package:hackathon/features/blogs/pages/blogs.dart';
+import 'package:hackathon/features/collaboration/pages/post_detail.dart';
+import 'package:hackathon/features/counselors/pages/counselors.dart';
+import 'package:hackathon/features/health/pages/health.dart';
+import 'package:hackathon/features/meditation/pages/meditation.dart';
+import 'package:hackathon/features/selfdevelopment/pages/selfdevelopment.dart';
 import 'package:hackathon/providers/auth_provider.dart';
+import 'package:hackathon/providers/screen_provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:hackathon/core/constants.dart';
@@ -48,16 +56,51 @@ class _HomeState extends State<Home> {
     {
       'icon': Icons.healing,
       'title': 'Health services',
+      'widget': const Health(),
     },
     {
       'icon': Icons.notes,
       'title': 'Our Blogs',
+      'widget': const Blogs(),
     },
     {
       'icon': Icons.library_books,
-      'title': 'Online resources and articles',
+      'title': 'Our Counselors',
+      'widget': const Counselors(),
+    },
+    {
+      'icon': Icons.health_and_safety_outlined,
+      'title': 'Self Development',
+      'widget': const SelfDevelopment(),
+    },
+    {
+      'icon': Icons.sports,
+      'title': 'Meditation',
+      'widget': MeditationPage(),
     },
   ];
+
+  List<AppUsageInfo> _infos = [];
+  Duration totalDuration = const Duration();
+
+  void getUsageStats() async {
+    try {
+      DateTime endDate = DateTime.now();
+      DateTime startDate = endDate.subtract(const Duration(hours: 24));
+      List<AppUsageInfo> infoList =
+          await AppUsage().getAppUsage(startDate, endDate);
+      if (!context.mounted) return;
+      setState(() {
+        _infos = infoList;
+        // _isLoading = false;
+      });
+      for (AppUsageInfo info in infoList) {
+        totalDuration += info.usage;
+      }
+    } on AppUsageException catch (exception) {
+      print(exception);
+    }
+  }
 
   void fetchPosts() async {
     final url = Uri.parse('${Constants.API_BASE}api/v1/posts');
@@ -98,12 +141,14 @@ class _HomeState extends State<Home> {
 
   @override
   void initState() {
-    fetchPosts();
     super.initState();
+    fetchPosts();
+    getUsageStats();
   }
 
   @override
   Widget build(BuildContext context) {
+    final screenProvider = Provider.of<ScreenProvider>(context, listen: false);
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -112,42 +157,13 @@ class _HomeState extends State<Home> {
               const SizedBox(
                 height: 20,
               ),
-              Stack(
-                alignment: Alignment.topRight,
-                children: [
-                  Center(
-                    child: Image.asset(
-                      'assets/images/logo.png', // Your logo image path
-                      width: 350,
-                      height: 100,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  // Positioned(
-                  //   top: 10,
-                  //   right: 10,
-                  //   child: GestureDetector(
-                  //     onTap: () => _showNotifications(context),
-                  //     child: Stack(
-                  //       alignment: Alignment.center,
-                  //       children: [
-                  //         Container(
-                  //           padding: const EdgeInsets.all(8),
-                  //           decoration: const BoxDecoration(
-                  //             color: Colors.red,
-                  //             shape: BoxShape.circle,
-                  //           ),
-                  //           child: const Icon(
-                  //             Icons.notifications,
-                  //             color: Colors.white,
-                  //             size: 20,
-                  //           ),
-                  //         ),
-                  //       ],
-                  //     ),
-                  //   ),
-                  // ),
-                ],
+              Center(
+                child: Image.asset(
+                  'assets/images/logo.png', // Your logo image path
+                  width: 350,
+                  height: 100,
+                  fit: BoxFit.cover,
+                ),
               ),
               const SizedBox(
                 height: 10,
@@ -162,6 +178,7 @@ class _HomeState extends State<Home> {
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const CircleAvatar(
                         radius: 30,
@@ -169,45 +186,78 @@ class _HomeState extends State<Home> {
                             'https://randomuser.me/api/portraits/men/86.jpg'),
                       ),
                       const SizedBox(width: 16.0),
-                      const Column(
+                      Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Raul',
+                          const Text(
+                            'Sandip',
                             style: TextStyle(
                               fontSize: 18.0,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          SizedBox(height: 4.0),
+                          // SizedBox(height: 4.0),
+                          Text(
+                              'Screen Time: ${Utils.formatDuration(totalDuration)}')
                         ],
                       ),
-                      const Spacer(),
-                      IconButton(
-                        onPressed: () => _showNotifications(context),
-                        icon: const Icon(Icons.notifications),
-                        color: Colors.blueGrey,
-                      ),
-                      const SizedBox(
-                        width: 10,
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          // logout
-                          final authProvider =
-                              Provider.of<AuthProvider>(context, listen: false);
-                          authProvider.setId = 0;
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => const LoginPage()));
-                        },
-                        icon: const Icon(
-                          Icons.logout,
-                          color: Colors.red,
-                        ),
+                      // const Spacer(),
+                      Row(
+                        children: [
+                          IconButton(
+                            onPressed: () => _showNotifications(context),
+                            icon: const Icon(Icons.notifications),
+                            color: Colors.blueGrey,
+                          ),
+                          // const SizedBox(
+                          //   width: 10,
+                          // ),
+                          IconButton(
+                            onPressed: () {
+                              // logout
+                              final authProvider = Provider.of<AuthProvider>(
+                                  context,
+                                  listen: false);
+                              authProvider.setId = 0;
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => const LoginPage()));
+                            },
+                            icon: const Icon(
+                              Icons.logout,
+                              color: Colors.red,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
+              ),
+              SizedBox(
+                child: screenProvider.getHours == 0
+                    ? const Text('')
+                    : Container(
+                        margin: const EdgeInsets.all(10),
+                        padding: const EdgeInsets.all(16.0),
+                        width: MediaQuery.of(context).size.width,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          color: screenProvider.getHours <=
+                                  totalDuration.inHours.toInt()
+                              ? Colors.green
+                              : Colors.red,
+                        ),
+                        child: Text(
+                          screenProvider.getHours <=
+                                  totalDuration.inHours.toInt()
+                              ? 'Good Job! You are under your screen time goal.'
+                              : 'Oops! You exceeded your screen time goal',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
               ),
 
               // Additional content related to student mental health support
@@ -226,6 +276,7 @@ class _HomeState extends State<Home> {
                     context,
                     _homeWidgets[index]['icon'],
                     _homeWidgets[index]['title'],
+                    _homeWidgets[index]['widget'],
                   );
                 },
               ),
@@ -240,103 +291,140 @@ class _HomeState extends State<Home> {
               //   title: Text('Online resources and articles'),
               // ),
               // const SizedBox(height: 8),
-              ListView.builder(
-                physics: const NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                itemCount: _posts.length,
-                itemBuilder: (context, index) {
-                  final post = _posts[index];
-                  return Container(
-                    margin: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.5),
-                            spreadRadius: 1,
-                            blurRadius: 4,
-                            offset: const Offset(
-                                0, 3), // changes position of shadow
-                          ),
-                        ],
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: Colors.black12,
-                          width: 1.0,
-                        )),
-                    child: Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                margin:
-                                    const EdgeInsets.symmetric(horizontal: 4),
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 4),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(12),
-                                  color: Colors.grey[300],
+              SizedBox(
+                width: MediaQuery.of(context).size.width,
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: Text(
+                    'Featured Discussions',
+                    textAlign: TextAlign.left,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              _posts.isNotEmpty
+                  ? ListView.builder(
+                      physics: const NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemCount: _posts.length,
+                      itemBuilder: (context, index) {
+                        final post = _posts[index];
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => PostDetailPage(post: post),
+                            ));
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.5),
+                                  spreadRadius: 1,
+                                  blurRadius: 4,
+                                  offset: const Offset(
+                                      0, 3), // changes position of shadow
                                 ),
-                                child: Text(post['category']['categoryTitle'],
-                                    style: const TextStyle(fontSize: 12)),
+                              ],
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: Colors.black12,
+                                width: 1.0,
                               ),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 15,
-                          ),
-                          Row(
-                            children: [
-                              const CircleAvatar(
-                                backgroundImage: NetworkImage(
-                                    // 'https://randomuser.me/api/portraits/men/${randomNumber()}.jpg'),
-                                    'https://randomuser.me/api/portraits/men/21.jpg'),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(20),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      if (post['category'] != null &&
+                                          post['category']['categoryTitle'] !=
+                                              null)
+                                        Container(
+                                          margin: const EdgeInsets.symmetric(
+                                              horizontal: 4),
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 8, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                            color: Colors.grey[300],
+                                          ),
+                                          child: Text(
+                                            post['category']['categoryTitle'],
+                                            style:
+                                                const TextStyle(fontSize: 12),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 15),
+                                  Row(
+                                    children: [
+                                      const CircleAvatar(
+                                        backgroundImage: NetworkImage(
+                                            'https://randomuser.me/api/portraits/men/21.jpg'),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      if (post['user'] != null &&
+                                          post['user']['name'] != null)
+                                        Text(
+                                          post['user']['name'],
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Text(
+                                    post['title'] ??
+                                        'Title', // Handle null title case
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 20),
+                                  const Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.thumb_up_alt_outlined),
+                                      Text('134'),
+                                      SizedBox(
+                                        width: 20,
+                                      ),
+                                      Icon(Icons.comment_outlined),
+                                      Text('14'),
+                                      SizedBox(
+                                        width: 20,
+                                      ),
+                                      Icon(Icons.share_outlined),
+                                    ],
+                                  ),
+                                ],
                               ),
-                              const SizedBox(width: 10),
-                              Text(
-                                post['user']['name'],
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-                          Text(
-                            post['title']!,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
                             ),
                           ),
-                          const SizedBox(height: 20),
-                          const Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Icon(Icons.thumb_up_alt_outlined),
-                              Text('134'),
-                              SizedBox(
-                                width: 20,
-                              ),
-                              Icon(Icons.comment_outlined),
-                              Text('14'),
-                              SizedBox(
-                                width: 20,
-                              ),
-                              Icon(Icons.share_outlined),
-                            ],
-                          ),
-                        ],
-                      ),
+                        );
+                      },
+                    )
+                  : const Center(
+                      child: Text('Empty Posts'),
                     ),
-                  );
-                },
-              ),
               // Add more support options as needed
             ],
           ),
@@ -346,7 +434,7 @@ class _HomeState extends State<Home> {
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(
-              icon: Icon(Icons.menu_book), label: 'Collaboration'),
+              icon: Icon(Icons.menu_book), label: 'Discussion'),
           BottomNavigationBarItem(icon: Icon(Icons.book), label: 'Consult'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
@@ -408,38 +496,45 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Widget _buildScreenCard(BuildContext context, IconData? icon, String? text) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10, right: 10),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(
-          color: Colors.black12,
-          width: 1.0,
+  Widget _buildScreenCard(
+      BuildContext context, IconData? icon, String? text, Widget screen) {
+    return GestureDetector(
+      onTap: () => {
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (context) => screen))
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 10, right: 10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(
+            color: Colors.black12,
+            width: 1.0,
+          ),
         ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.only(top: 15, left: 4, right: 4),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          // crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 45,
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            Center(
-              child: Text(
-                text ?? '',
-                textAlign: TextAlign.center,
-                overflow: TextOverflow.ellipsis,
-                softWrap: true,
+        child: Padding(
+          padding: const EdgeInsets.only(top: 15, left: 4, right: 4),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            // crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 45,
               ),
-            ),
-          ],
+              const SizedBox(
+                height: 10,
+              ),
+              Center(
+                child: Text(
+                  text ?? '',
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                  softWrap: true,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -458,17 +553,13 @@ class _ChatWithAISheetState extends State<ChatWithAISheet> {
   final TextEditingController _controller = TextEditingController();
   late final GroqChat chat;
 
-  void _sendMessage() async {
+  void _sendMessage(BuildContext context) async {
     if (_controller.text.isNotEmpty) {
       final text = _controller.text;
       _controller.clear();
+      FocusScope.of(context).unfocus();
       await chat.sendMessage(text);
     }
-  }
-
-  String _generateAIResponse(String userMessage) {
-    // In a real application, you would make a request to an AI service
-    return 'AI response to "$userMessage"';
   }
 
   @override
@@ -505,7 +596,7 @@ class _ChatWithAISheetState extends State<ChatWithAISheet> {
           const SizedBox(
             height: 10,
           ),
-          const Text('Talk with AI',
+          const Text('Instant Counselor',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700)),
           Expanded(
             child: ListView.builder(
@@ -546,7 +637,7 @@ class _ChatWithAISheetState extends State<ChatWithAISheet> {
                   ),
                   IconButton(
                     icon: const Icon(Icons.send),
-                    onPressed: _sendMessage,
+                    onPressed: () => _sendMessage(context),
                   ),
                 ],
               ),

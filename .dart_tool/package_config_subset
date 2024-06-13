@@ -1,3 +1,7 @@
+app_usage
+2.12
+file:///home/empash/.pub-cache/hosted/pub.dev/app_usage-3.0.1/
+file:///home/empash/.pub-cache/hosted/pub.dev/app_usage-3.0.1/lib/
 async
 2.18
 file:///home/empash/.pub-cache/hosted/pub.dev/async-2.11.0/
@@ -38,6 +42,10 @@ flutter_lints
 3.1
 file:///home/empash/.pub-cache/hosted/pub.dev/flutter_lints-3.0.2/
 file:///home/empash/.pub-cache/hosted/pub.dev/flutter_lints-3.0.2/lib/
+flutter_webview_plugin
+2.12
+file:///home/empash/.pub-cache/hosted/pub.dev/flutter_webview_plugin-0.4.0/
+file:///home/empash/.pub-cache/hosted/pub.dev/flutter_webview_plugin-0.4.0/lib/
 groq_sdk
 3.0
 file:///home/empash/.pub-cache/hosted/pub.dev/groq_sdk-0.0.6/

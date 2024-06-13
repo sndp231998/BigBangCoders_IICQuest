@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hackathon/providers/screen_provider.dart';
+import 'package:provider/provider.dart';
 
 class Profile extends StatefulWidget {
   const Profile({Key? key}) : super(key: key);
@@ -30,92 +32,98 @@ class _ProfileState extends State<Profile> {
       appBar: AppBar(
         title: const Text('Profile'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Center(
-              child: CircleAvatar(
-                radius: 60,
-                backgroundColor: Colors.blue, // Example background color
-                child: Text(
-                  'JD', // Initials
-                  style: TextStyle(
-                    color: Colors.white, // Text color
-                    fontWeight: FontWeight.bold,
-                    fontSize: 24,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Center(
+                child: CircleAvatar(
+                  radius: 60,
+                  backgroundColor: Colors.blue, // Example background color
+                  child: Text(
+                    'JD', // Initials
+                    style: TextStyle(
+                      color: Colors.white, // Text color
+                      fontWeight: FontWeight.bold,
+                      fontSize: 24,
+                    ),
                   ),
                 ),
               ),
-            ),
-            TextFormField(
-              controller: _nameController,
-              decoration: const InputDecoration(labelText: 'Name'),
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _emailController,
-              decoration: const InputDecoration(labelText: 'Email'),
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _bioController,
-              maxLines: 3,
-              decoration: const InputDecoration(labelText: 'Bio'),
-            ),
-            const SizedBox(height: 32),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    // Update profile logic goes here
-                    setState(() {
-                      _name = _nameController.text;
-                      _email = _emailController.text;
-                      _bio = _bioController.text;
-                    });
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Profile updated')),
-                    );
-                  },
-                  child: const Text('Update Profile'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    // View profile logic goes here
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text('Your Profile'),
-                        content: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Name: $_name'),
-                            const SizedBox(height: 8),
-                            Text('Email: $_email'),
-                            const SizedBox(height: 8),
-                            Text('Bio: $_bio'),
+              TextFormField(
+                controller: _nameController,
+                decoration: const InputDecoration(labelText: 'Name'),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _emailController,
+                decoration: const InputDecoration(labelText: 'Email'),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _bioController,
+                maxLines: 3,
+                decoration: const InputDecoration(labelText: 'Bio'),
+              ),
+              const SizedBox(height: 32),
+              ElevatedButton(
+                onPressed: _setScreenTimeGoal,
+                child: const Text('Set Screen Time Goal'),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      // Update profile logic goes here
+                      setState(() {
+                        _name = _nameController.text;
+                        _email = _emailController.text;
+                        _bio = _bioController.text;
+                      });
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Profile updated')),
+                      );
+                    },
+                    child: const Text('Update Profile'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      // View profile logic goes here
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('Your Profile'),
+                          content: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Name: $_name'),
+                              const SizedBox(height: 8),
+                              Text('Email: $_email'),
+                              const SizedBox(height: 8),
+                              Text('Bio: $_bio'),
+                            ],
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              child: const Text('Close'),
+                            ),
                           ],
                         ),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            child: const Text('Close'),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                  child: const Text('View Profile'),
-                ),
-              ],
-            ),
-          ],
+                      );
+                    },
+                    child: const Text('View Profile'),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -127,5 +135,41 @@ class _ProfileState extends State<Profile> {
     _emailController.dispose();
     _bioController.dispose();
     super.dispose();
+  }
+
+  void _setScreenTimeGoal() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          TextEditingController _controller = TextEditingController();
+          return AlertDialog(
+            title: const Text('Set Screen Time Goal'),
+            content: TextField(
+              controller: _controller,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                hintText: 'Enter duration in hours',
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () {
+                  // set in provider
+                  final screenProvider =
+                      Provider.of<ScreenProvider>(context, listen: false);
+                  screenProvider.setHours = int.parse(_controller.text);
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Set'),
+              ),
+            ],
+          );
+        });
   }
 }

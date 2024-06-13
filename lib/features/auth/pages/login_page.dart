@@ -82,69 +82,71 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                // Logo or Header
-                Image.asset(
-                  'assets/images/logo.png', // Your logo image path
-                  width: 250,
-                  height: 150,
-                  fit: BoxFit.cover,
-                  // You can adjust width and height as needed
-                ),
-                const SizedBox(height: 30),
-                // Username Field
-                TextFormField(
-                  controller: _usernameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Username',
-                    prefixIcon: Icon(Icons.person),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  // Logo or Header
+                  Image.asset(
+                    'assets/images/logo.png', // Your logo image path
+                    width: 250,
+                    height: 150,
+                    fit: BoxFit.cover,
+                    // You can adjust width and height as needed
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your username';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
-                // Password Field
-                TextFormField(
-                  controller: _passwordController,
-                  decoration: const InputDecoration(
-                    labelText: 'Password',
-                    prefixIcon: Icon(Icons.lock),
+                  const SizedBox(height: 30),
+                  // Username Field
+                  TextFormField(
+                    controller: _usernameController,
+                    decoration: const InputDecoration(
+                      labelText: 'Username',
+                      prefixIcon: Icon(Icons.person),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your username';
+                      }
+                      return null;
+                    },
                   ),
-                  obscureText: true,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your password';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
-                // Login Button
-                ElevatedButton.icon(
-                  onPressed: () => _login(context),
-                  icon: const Icon(Icons.login),
-                  label: const Text('Login'),
-                ),
-                const SizedBox(height: 10), // Add some spacing
-                TextButton(
-                  onPressed: () {
-                    // Navigate to the register page
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => const RegisterPage()));
-                  },
-                  child: const Text('Register'),
-                ),
-              ],
+                  const SizedBox(height: 20),
+                  // Password Field
+                  TextFormField(
+                    controller: _passwordController,
+                    decoration: const InputDecoration(
+                      labelText: 'Password',
+                      prefixIcon: Icon(Icons.lock),
+                    ),
+                    obscureText: true,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your password';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  // Login Button
+                  ElevatedButton.icon(
+                    onPressed: () => _login(context),
+                    icon: const Icon(Icons.login),
+                    label: const Text('Login'),
+                  ),
+                  const SizedBox(height: 10), // Add some spacing
+                  TextButton(
+                    onPressed: () {
+                      // Navigate to the register page
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => const RegisterPage()));
+                    },
+                    child: const Text('Register'),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

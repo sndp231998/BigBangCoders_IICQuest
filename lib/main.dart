@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:hackathon/features/auth/pages/login_page.dart';
 import 'package:hackathon/features/consult/pages/dashboard.dart';
 import 'package:hackathon/features/home/pages/home.dart';
+import 'package:hackathon/features/selfdevelopment/pages/selfdevelopment.dart';
 import 'package:hackathon/providers/auth_provider.dart';
+import 'package:hackathon/providers/screen_provider.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -10,6 +12,7 @@ void main() {
     MultiProvider(
       providers: [
         ChangeNotifierProvider<AuthProvider>(create: (_) => AuthProvider()),
+        ChangeNotifierProvider<ScreenProvider>(create: (_) => ScreenProvider()),
       ],
       child: const MyApp(),
     ),
@@ -47,5 +50,6 @@ class MyHomePage extends StatelessWidget {
     // return isAuthenticated ? const Home() : const LoginPage();
     // return const Dashboard();
     return Home();
+    // return SelfDevelopment();
   }
 }

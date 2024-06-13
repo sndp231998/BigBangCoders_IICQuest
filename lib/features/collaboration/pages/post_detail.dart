@@ -1,30 +1,85 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:hackathon/core/constants.dart';
+import 'package:http/http.dart' as http;
 
-class PostDetailPage extends StatelessWidget {
-  final Map<String, String> post;
+class PostDetailPage extends StatefulWidget {
+  final Map<String, dynamic> post;
 
   const PostDetailPage({Key? key, required this.post}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    final List<Map<String, String>> comments = [
-      {
-        'userName': 'Alice Johnson',
-        'comment': 'This is a great post!',
-      },
-      {
-        'userName': 'Bob Smith',
-        'comment': 'I found this information very useful.',
-      },
-      {
-        'userName': 'Charlie Brown',
-        'comment': 'Thanks for sharing this!',
-      },
-    ];
+  _PostDetailPageState createState() => _PostDetailPageState();
+}
 
+class _PostDetailPageState extends State<PostDetailPage> {
+  final TextEditingController _commentController = TextEditingController();
+  List<Map<String, String>> _comments = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchComments();
+  }
+
+  Future<void> fetchComments() async {
+    final url =
+        Uri.parse('${Constants.API_BASE}/comments?postId=${widget.post['id']}');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body);
+      print(data);
+      setState(() {
+        // _comments = data;
+      });
+    } else {
+      throw Exception('Failed to load comments');
+    }
+  }
+
+  void _submitComment(BuildContext context) async {
+    final comment = _commentController.text;
+
+    if (comment.isEmpty) {
+      return;
+    }
+
+    final url = Uri.parse(
+        '${Constants.API_BASE}api/v1/post/${widget.post['postId']}/comments');
+
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'content': comment,
+      }),
+    );
+
+    if (response.statusCode == 201) {
+      fetchComments();
+      _commentController.clear();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Comment submitted successfully!')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to submit comment')),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _commentController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(post['title'] ?? 'Post Detail'),
+        title: const Text('Post Detail'),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -34,12 +89,18 @@ class PostDetailPage extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  CircleAvatar(
-                    backgroundImage: NetworkImage(post['userImage']!),
+                  // if (widget.post['userImage'] != null)
+                  // CircleAvatar(
+                  //   backgroundImage: NetworkImage(widget.post['userImage']),
+                  // ),
+                  // else
+                  const CircleAvatar(
+                    backgroundImage: AssetImage(
+                        'assets/images/consult1.jpeg'), // Placeholder image
                   ),
                   const SizedBox(width: 10),
                   Text(
-                    post['userName']!,
+                    widget.post['user']['name'] ?? 'Anonymous',
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
@@ -49,7 +110,7 @@ class PostDetailPage extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Text(
-                post['title']!,
+                widget.post['title'] ?? 'Title',
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 24,
@@ -57,22 +118,21 @@ class PostDetailPage extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               Text(
-                post['postContent']!,
+                widget.post['content'] ?? 'content available',
                 style: const TextStyle(
                   fontSize: 16,
                 ),
               ),
-              const SizedBox(height: 10),
-              if (post['postImage'] != null) Image.network(post['postImage']!),
+              if (widget.post['postImage'] != null) ...[
+                const SizedBox(height: 10),
+                Image.network(widget.post['postImage']),
+              ],
               const SizedBox(height: 10),
               const Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Icon(Icons.thumb_up_alt_outlined),
-                  SizedBox(
-                    width: 10,
-                  ),
-                  // Icon(Icons.comment_outlined),
+                  SizedBox(width: 10),
                   Icon(Icons.share_outlined),
                 ],
               ),
@@ -87,9 +147,9 @@ class PostDetailPage extends StatelessWidget {
               ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                itemCount: comments.length,
+                itemCount: _comments.length,
                 itemBuilder: (context, index) {
-                  final comment = comments[index];
+                  final comment = _comments[index];
                   return ListTile(
                     title: Text(
                       comment['userName']!,
@@ -104,9 +164,10 @@ class PostDetailPage extends StatelessWidget {
               const Divider(height: 30),
               Row(
                 children: [
-                  const Expanded(
+                  Expanded(
                     child: TextField(
-                      decoration: InputDecoration(
+                      controller: _commentController,
+                      decoration: const InputDecoration(
                         hintText: 'Add a comment...',
                         border: OutlineInputBorder(),
                       ),
@@ -114,9 +175,7 @@ class PostDetailPage extends StatelessWidget {
                   ),
                   IconButton(
                     icon: const Icon(Icons.send),
-                    onPressed: () {
-                      // Logic to send a comment
-                    },
+                    onPressed: () => _submitComment(context),
                   ),
                 ],
               ),
