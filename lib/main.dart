@@ -4,6 +4,7 @@ import 'package:hackathon/features/consult/pages/dashboard.dart';
 import 'package:hackathon/features/home/pages/home.dart';
 import 'package:hackathon/features/selfdevelopment/pages/selfdevelopment.dart';
 import 'package:hackathon/providers/auth_provider.dart';
+import 'package:hackathon/providers/note_provider.dart';
 import 'package:hackathon/providers/screen_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -13,6 +14,7 @@ void main() {
       providers: [
         ChangeNotifierProvider<AuthProvider>(create: (_) => AuthProvider()),
         ChangeNotifierProvider<ScreenProvider>(create: (_) => ScreenProvider()),
+        ChangeNotifierProvider<NoteProvider>(create: (_) => NoteProvider()),
       ],
       child: const MyApp(),
     ),
@@ -42,9 +44,7 @@ class MyHomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context);
-
-    // Handle null value from authProvider.getId
+    final authProvider = Provider.of<AuthProvider>(context);    // Handle null value from authProvider.getId
     final isAuthenticated = authProvider.getId != 0;
 
     // return isAuthenticated ? const Home() : const LoginPage();

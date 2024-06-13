@@ -10,9 +10,9 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
-  String _name = 'John Doe';
-  String _email = 'john.doe@example.com';
-  String _bio = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.';
+  String _name = 'Sandip Chapagain';
+  String _email = 'sandip@gmail.com';
+  String _bio = 'I am a student of BCA 8th sem of DMC college with some light mental issues!';
 
   TextEditingController _nameController = TextEditingController();
   TextEditingController _emailController = TextEditingController();
@@ -68,10 +68,7 @@ class _ProfileState extends State<Profile> {
                 decoration: const InputDecoration(labelText: 'Bio'),
               ),
               const SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: _setScreenTimeGoal,
-                child: const Text('Set Screen Time Goal'),
-              ),
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -121,6 +118,16 @@ class _ProfileState extends State<Profile> {
                     child: const Text('View Profile'),
                   ),
                 ],
+              ),
+              SizedBox(
+                width: MediaQuery.of(context).size.width,
+                child: ElevatedButton(
+                  style:ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                  ),
+                  onPressed: _setScreenTimeGoal,
+                  child: const Text('Set Screen Time Goal', style: TextStyle(color: Colors.white),),
+                ),
               ),
             ],
           ),

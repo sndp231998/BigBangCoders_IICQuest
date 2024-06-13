@@ -89,6 +89,7 @@ class _HomeState extends State<Home> {
 
   List<AppUsageInfo> _infos = [];
   List<Map<String, dynamic>> _notifications = [];
+  bool isNotificationLoading = true;
   Duration totalDuration = const Duration();
 
   void getUsageStats() async {
@@ -143,8 +144,8 @@ class _HomeState extends State<Home> {
     }
   }
 
-  String randomNumber() {
-    return Random().nextInt(100).toString();
+  String randomNumber(int num) {
+    return Random().nextInt(num).toString();
   }
 
   void _fetchNotifications(BuildContext context) async {
@@ -157,6 +158,7 @@ class _HomeState extends State<Home> {
       var result = jsonDecode(response.body);
       setState(() {
         _notifications = [...result];
+        isNotificationLoading = false;
       });
     }
   }
@@ -264,13 +266,13 @@ class _HomeState extends State<Home> {
                         width: MediaQuery.of(context).size.width,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(8),
-                          color: screenProvider.getHours <=
+                          color: screenProvider.getHours >
                                   totalDuration.inHours.toInt()
                               ? Colors.green
                               : Colors.red,
                         ),
                         child: Text(
-                          screenProvider.getHours <=
+                          screenProvider.getHours >
                                   totalDuration.inHours.toInt()
                               ? 'Good Job! You are under your screen time goal.'
                               : 'Oops! You exceeded your screen time goal',
@@ -440,22 +442,22 @@ class _HomeState extends State<Home> {
                                     ),
                                   ),
                                   const SizedBox(height: 20),
-                                  const Row(
+                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.start,
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
                                     children: [
-                                      Icon(Icons.thumb_up_alt_outlined),
-                                      Text('134'),
-                                      SizedBox(
+                                      const Icon(Icons.thumb_up_alt_outlined),
+                                      Text(randomNumber(54)),
+                                      const SizedBox(
                                         width: 20,
                                       ),
-                                      Icon(Icons.comment_outlined),
-                                      Text('14'),
-                                      SizedBox(
+                                      const Icon(Icons.comment_outlined),
+                                      Text(randomNumber(30)),
+                                      const SizedBox(
                                         width: 20,
                                       ),
-                                      Icon(Icons.share_outlined),
+                                      const Icon(Icons.share_outlined),
                                     ],
                                   ),
                                 ],
@@ -474,6 +476,7 @@ class _HomeState extends State<Home> {
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
+
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(
@@ -483,7 +486,7 @@ class _HomeState extends State<Home> {
         ],
         type: BottomNavigationBarType.fixed,
         onTap: _onItemTapped,
-        selectedItemColor: Colors.lightBlue,
+        selectedItemColor: Colors.green,
         unselectedItemColor: Colors.grey,
       ),
       floatingActionButton: FloatingActionButton(
@@ -506,26 +509,32 @@ class _HomeState extends State<Home> {
     _fetchNotifications(context);
     print(_notifications);
     showModalBottomSheet(
+      isScrollControlled: true,
       context: context,
       builder: (context) {
+        // if (isNotificationLoading) {
+        //   return Center(child: CircularProgressIndicator());
+        // }
         return Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Notifications',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-              for (var item in _notifications)
-                ListTile(
-                  leading: const Icon(Icons.notification_important),
-                  title: const Text('Notification 1'),
-                  subtitle: Text(item['tip']),
+          child:SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Notifications',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
-            ],
+                const SizedBox(height: 10),
+                for (var item in _notifications)
+                  ListTile(
+                    leading: const Icon(Icons.notification_important),
+
+                    subtitle: Text(item['tip']),
+                  ),
+              ],
+            ),
           ),
         );
       },

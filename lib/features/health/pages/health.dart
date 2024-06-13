@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hackathon/features/consult/pages/consult.dart';
 
 class Health extends StatefulWidget {
   const Health({super.key});
@@ -131,6 +132,7 @@ class _HealthState extends State<Health> {
                 child: ElevatedButton.icon(
                   onPressed: () {
                     // Navigate to appointment booking page
+                    Navigator.of(context).push(MaterialPageRoute(builder: (context)=>const Consult()));
                   },
                   icon: const Icon(Icons.calendar_today),
                   label: const Text('Book an Appointment'),

@@ -218,11 +218,90 @@ void _showOptionsDialog(BuildContext context, Professional professional) {
                   // Implement logic to navigate to appointment scheduling interface
                 },
               ),
+              ListTile(
+                leading: const Icon(Icons.feedback_outlined),
+                title: const Text('Leave a Feedback'),
+                onTap: () {
+                  _leaveFeedback(context);
+                  // Implement logic to navigate to appointment scheduling interface
+                },
+              ),
             ],
           ),
         ),
       );
     },
+  );
+}
+
+void _leaveFeedback(BuildContext context){
+  final TextEditingController _messageController = TextEditingController();
+  showDialog(
+      context: context,
+      builder: (BuildContext context) {
+    return AlertDialog(
+
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextFormField(
+            controller: _messageController,
+            decoration: const InputDecoration(labelText: 'Message'),
+            keyboardType: TextInputType.multiline,
+            onTap: () {
+              // Implement logic to show date picker
+            },
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () async {
+            final message = _messageController.text;
+
+            if (message.isEmpty) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Please fill in all fields')),
+              );
+              return;
+            }
+
+            // final url = Uri.parse('YOUR_API_ENDPOINT');
+            // final response = await http.post(
+            //   url,
+            //   headers: {'Content-Type': 'application/json'},
+            //   body: jsonEncode({
+            //     'professionalId': professional.id,
+            //     'date': date,
+            //     'time': time,
+            //     'reason': reason,
+            //   }),
+            // );
+
+            if (true) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                    content: Text('Feedback sent successfully!')),
+              );
+              Navigator.pop(context); // Close dialog
+            }
+            // else {
+            //   ScaffoldMessenger.of(context).showSnackBar(
+            //     const SnackBar(content: Text('Failed to schedule appointment')),
+            //   );
+            // }
+          },
+          child: const Text('Send'),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context); // Close dialog
+          },
+          child: const Text('Cancel'),
+        ),
+      ],
+    );
+  },
   );
 }
 
