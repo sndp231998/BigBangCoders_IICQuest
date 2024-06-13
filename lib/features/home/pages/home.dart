@@ -6,12 +6,14 @@ import 'package:groq_sdk/models/groq.dart';
 import 'package:groq_sdk/models/groq_chat.dart';
 import 'package:groq_sdk/models/groq_llm_model.dart';
 import 'package:hackathon/core/utils.dart';
+import 'package:hackathon/features/academic/pages/academic.dart';
 import 'package:hackathon/features/auth/pages/login_page.dart';
 import 'package:hackathon/features/blogs/pages/blogs.dart';
 import 'package:hackathon/features/collaboration/pages/post_detail.dart';
 import 'package:hackathon/features/counselors/pages/counselors.dart';
 import 'package:hackathon/features/health/pages/health.dart';
 import 'package:hackathon/features/meditation/pages/meditation.dart';
+import 'package:hackathon/features/notes/pages/notes.dart';
 import 'package:hackathon/features/selfdevelopment/pages/selfdevelopment.dart';
 import 'package:hackathon/providers/auth_provider.dart';
 import 'package:hackathon/providers/screen_provider.dart';
@@ -78,9 +80,15 @@ class _HomeState extends State<Home> {
       'title': 'Meditation',
       'widget': MeditationPage(),
     },
+    {
+      'icon': Icons.school_outlined,
+      'title': 'Academics',
+      'widget': const Academic(),
+    },
   ];
 
   List<AppUsageInfo> _infos = [];
+  List<Map<String, dynamic>> _notifications = [];
   Duration totalDuration = const Duration();
 
   void getUsageStats() async {
@@ -137,6 +145,20 @@ class _HomeState extends State<Home> {
 
   String randomNumber() {
     return Random().nextInt(100).toString();
+  }
+
+  void _fetchNotifications(BuildContext context) async {
+    final url = Uri.parse('${Constants.API_BASE}api/health-tips');
+    final response = await http.get(
+      url,
+    );
+
+    if (response.statusCode == 200) {
+      var result = jsonDecode(response.body);
+      setState(() {
+        _notifications = [...result];
+      });
+    }
   }
 
   @override
@@ -261,7 +283,28 @@ class _HomeState extends State<Home> {
               ),
 
               // Additional content related to student mental health support
-              const SizedBox(height: 20),
+              Center(
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).push(
+                        MaterialPageRoute(builder: (context) => const Notes()));
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Colors.black12,
+                        width: .5,
+                      ),
+                    ),
+                    child: const Column(
+                      children: [Icon(Icons.add), Text('Manage Notes')],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
               GridView.builder(
                 padding: const EdgeInsets.all(20),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -460,35 +503,28 @@ class _HomeState extends State<Home> {
   }
 
   void _showNotifications(BuildContext context) {
+    _fetchNotifications(context);
+    print(_notifications);
     showModalBottomSheet(
       context: context,
       builder: (context) {
-        return const Padding(
-          padding: EdgeInsets.all(16.0),
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 'Notifications',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 10),
-              ListTile(
-                leading: Icon(Icons.notification_important),
-                title: Text('Notification 1'),
-                subtitle: Text('Details about notification 1'),
-              ),
-              ListTile(
-                leading: Icon(Icons.notification_important),
-                title: Text('Notification 2'),
-                subtitle: Text('Details about notification 2'),
-              ),
-              ListTile(
-                leading: Icon(Icons.notification_important),
-                title: Text('Notification 3'),
-                subtitle: Text('Details about notification 3'),
-              ),
+              const SizedBox(height: 10),
+              for (var item in _notifications)
+                ListTile(
+                  leading: const Icon(Icons.notification_important),
+                  title: const Text('Notification 1'),
+                  subtitle: Text(item['tip']),
+                ),
             ],
           ),
         );

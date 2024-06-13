@@ -1,32 +1,46 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:hackathon/core/constants.dart';
+import 'package:http/http.dart' as http;
 
 class Blogs extends StatefulWidget {
-  const Blogs({super.key});
+  const Blogs({Key? key}) : super(key: key);
 
   @override
   State<Blogs> createState() => _BlogsState();
 }
 
 class _BlogsState extends State<Blogs> {
-  final List<Map<String, String>> _blogPosts = [
-    {
-      'title': 'Healthy Eating Habits',
-      'author': 'John Doe',
-      'date': 'May 15, 2023',
-      'image': 'assets/images/blog1.avif',
-      'content':
-          "In today's interconnected world, where technology permeates every aspect of our lives, it's essential to navigate the digital landscape with vigilance and purpose. From social media platforms shaping public discourse to artificial intelligence revolutionizing industries, the pace of technological advancement is relentless. Yet, amidst this whirlwind of innovation, fundamental questions of ethics, privacy, and human connection persist. How do we ensure technology serves humanity rather than dictates its course? As we embrace digital transformation, fostering a balance between innovation and ethical stewardship becomes paramount. It's a journey that demands continuous reflection, collaboration across disciplines, and a commitment to values that uphold the dignity and well-being of all individuals",
-    },
-    {
-      'title': 'Navigate the digital landscape with vigilance and purpose',
-      'author': 'Jane Smith',
-      'date': 'June 2, 2023',
-      'image': 'assets/images/digital.jpg',
-      'content':
-          'In today\'s interconnected world, where technology permeates every aspect of our lives, it\'s essential to navigate the digital landscape with vigilance and purpose. From social media platforms shaping public discourse to artificial intelligence revolutionizing industries, the pace of technological advancement is relentless. Yet, amidst this whirlwind of innovation, fundamental questions of ethics, privacy, and human connection persist. How do we ensure technology serves humanity rather than dictates its course? As we embrace digital transformation, fostering a balance between innovation and ethical stewardship becomes paramount. It\'s a journey that demands continuous reflection, collaboration across disciplines, and a commitment to values that uphold the dignity and well-being of all individuals',
-    },
-    // Add more blog posts as needed
-  ];
+  List<Map<String, dynamic>> _blogPosts = [];
+
+  void _fetchBlogs(BuildContext context) async {
+    final url = Uri.parse('${Constants.API_BASE}api/blogs');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      var result = jsonDecode(response.body);
+      setState(() {
+        // Assuming `result` is a list of maps containing blog post data
+        _blogPosts = List<Map<String, dynamic>>.from(result);
+      });
+    } else {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to fetch blogs: ${response.body}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  void initState() {
+    _fetchBlogs(context);
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,6 +60,7 @@ class _BlogsState extends State<Blogs> {
         itemCount: _blogPosts.length,
         itemBuilder: (context, index) {
           final post = _blogPosts[index];
+          print(post);
           return GestureDetector(
             onTap: () {
               // Navigate to BlogDetailPage with post details
@@ -74,18 +89,9 @@ class _BlogsState extends State<Blogs> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8.0),
-                    child: Image.asset(
-                      post['image']!,
-                      width: double.infinity,
-                      height: 200,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
                   const SizedBox(height: 10),
                   Text(
-                    post['title']!,
+                    post['title'] ?? '',
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -93,12 +99,12 @@ class _BlogsState extends State<Blogs> {
                   ),
                   const SizedBox(height: 5),
                   Text(
-                    '${post['date']}',
+                    post['createdon'] ?? '',
                     style: TextStyle(color: Colors.grey[600]),
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    post['content']!,
+                    post['body'] ?? '',
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -113,7 +119,7 @@ class _BlogsState extends State<Blogs> {
 }
 
 class BlogDetailPage extends StatelessWidget {
-  final Map<String, String> post;
+  final Map<String, dynamic> post;
 
   const BlogDetailPage({Key? key, required this.post}) : super(key: key);
 
@@ -134,7 +140,7 @@ class BlogDetailPage extends StatelessWidget {
                 top: 20,
               ),
               child: Text(
-                post['title']!,
+                post['title'] ?? '',
                 style: const TextStyle(
                   fontSize: 35,
                   fontWeight: FontWeight.w700,
@@ -143,28 +149,31 @@ class BlogDetailPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            Row(children: [
-              Text(
-                'By ${post['author']} - ${post['date']}',
-                style: TextStyle(color: Colors.grey[600]),
-                textAlign: TextAlign.left,
-              ),
-            ]),
-            const SizedBox(
-              height: 5,
-            ),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8.0),
-              child: Image.asset(
-                post['image']!,
-                width: double.infinity,
-                height: 200,
-                fit: BoxFit.cover,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  '${post['createdon'] ?? ''}',
+                  style: TextStyle(color: Colors.grey[600]),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
             const SizedBox(height: 10),
+            post['image'] != null
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(8.0),
+                    child: Image.network(
+                      post['image']!,
+                      width: double.infinity,
+                      height: 200,
+                      fit: BoxFit.cover,
+                    ),
+                  )
+                : Container(),
+            const SizedBox(height: 10),
             Text(
-              post['content']!,
+              post['body'] ?? '',
               style: const TextStyle(fontSize: 16),
             ),
           ],

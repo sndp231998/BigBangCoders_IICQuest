@@ -22,6 +22,7 @@ dependencies:
   groq_sdk: ^0.0.6
   app_usage: ^3.0.1
   flutter_webview_plugin: ^0.4.0
+  video_player: ^2.8.7
 
 dev_dependencies:
   flutter_test:
